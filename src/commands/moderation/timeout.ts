@@ -30,7 +30,7 @@ const data = new SlashCommandBuilder()
 
 async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
   try {
-    // Defer reply immediately to prevent interaction timeout
+    
     await interaction.deferReply();
     
     const targetUser = interaction.options.getUser('username', true);
@@ -77,7 +77,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
 
     const expiresAt = Date.now() + duration;
 
-    // Check if user is already timed out
+    
     const existingTimeout = await ModerationLog.findOne({
       where: {
         discordUserId: targetUser.id,
@@ -99,7 +99,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get or create user data
+    
     let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
     if (!userData) {
       userData = await UserModel.create({
@@ -109,7 +109,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Create moderation log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUser.id,
       guildId: interaction.guild?.id || '',
@@ -121,19 +121,19 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       isActive: true
     });
 
-    // Try to timeout user in Discord
+    
     let discordTimeoutSuccess = false;
     if (interaction.guild) {
       try {
         const targetMember = await interaction.guild.members.fetch(targetUser.id);
         
-        // Check if bot has permission to timeout members
+        
         const botMember = interaction.guild.members.me;
         if (!botMember?.permissions.has('ModerateMembers')) {
           throw new Error('Bot missing MODERATE_MEMBERS permission');
         }
         
-        // Check if target user is moderatable
+        
         if (!targetMember.moderatable) {
           throw new Error('Cannot timeout this user - they may have higher permissions');
         }
@@ -143,7 +143,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       } catch (error) {
         console.error('Failed to timeout user in Discord:', error);
         
-        // If it's a permission error, return early with error message
+        
         if (error instanceof Error && (error.message.includes('permission') || error.message.includes('50013'))) {
           const embed = new EmbedBuilder()
             .setTitle('❌ Permission Error')
@@ -157,7 +157,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Create timeout embed
+    
     const embed = new EmbedBuilder()
       .setTitle('⏰ User Timed Out')
       .setDescription(`<@${targetUser.id}> has been timed out`)
@@ -180,13 +180,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send DM to user
+    
     await sendDMNotification(targetUser, reason, duration, interaction.user.tag);
 
-    // Send response
+    
     await interaction.editReply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {
@@ -209,9 +209,9 @@ function parseDuration(durationStr: string): number | null {
   const unit = match[2].toLowerCase();
 
   switch (unit) {
-    case 'm': return amount * 60 * 1000; // minutes
-    case 'h': return amount * 60 * 60 * 1000; // hours
-    case 'd': return amount * 24 * 60 * 60 * 1000; // days
+    case 'm': return amount * 60 * 1000; 
+    case 'h': return amount * 60 * 60 * 1000; 
+    case 'd': return amount * 24 * 60 * 60 * 1000; 
     default: return null;
   }
 }

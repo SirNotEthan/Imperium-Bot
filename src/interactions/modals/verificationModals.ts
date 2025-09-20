@@ -7,11 +7,11 @@ export default {
   async execute(interaction: ModalSubmitInteraction) {
     const customId = interaction.customId;
     
-    // Parse the custom ID to get action and user ID
+    
     if (customId.startsWith('verify_username_')) {
       const userId = customId.replace('verify_username_', '');
       
-      // Verify this is the correct user
+      
       if (userId !== interaction.user.id) {
         try {
           await interaction.reply({ 

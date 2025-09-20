@@ -112,7 +112,7 @@ function createLevelEmbed(user: User, progress: any, isOwnLevel: boolean): Embed
   }
 
   embed.setFooter({ 
-    text: 'Levels increase based on server activity • 1 minute cooldown between messages' 
+    text: 'Levels increase based on server activity • Messages must be 3+ characters' 
   });
 
   return embed;
@@ -130,12 +130,12 @@ function createProgressBar(current: number, total: number, length: number = 20):
 }
 
 function getLevelColor(level: number): number {
-  if (level >= 100) return 0xFFD700; // Gold
-  if (level >= 75) return 0xFF6B6B;  // Red
-  if (level >= 50) return 0xFF9500;  // Orange  
-  if (level >= 25) return 0x4ECDC4;  // Teal
-  if (level >= 10) return 0x45B7D1;  // Blue
-  return 0x96CEB4; // Light Green
+  if (level >= 100) return 0xFFD700; 
+  if (level >= 75) return 0xFF6B6B;  
+  if (level >= 50) return 0xFF9500;  
+  if (level >= 25) return 0x4ECDC4;  
+  if (level >= 10) return 0x45B7D1;  
+  return 0x96CEB4; 
 }
 
 export default { data, execute };

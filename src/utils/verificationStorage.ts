@@ -20,7 +20,7 @@ class VerificationStorage {
 
   async verifyUser(discordId: string, robloxId: number, robloxUsername: string): Promise<boolean> {
     try {
-      // Check if Roblox account is already linked to another Discord account
+      
       const existingRobloxUser = await User.findOne({ 
         where: { 
           robloxId,
@@ -30,7 +30,7 @@ class VerificationStorage {
         return false;
       }
 
-      // Find or create user record
+      
       let [user] = await User.findOrCreate({
         where: { discordId },
         defaults: {
@@ -40,7 +40,7 @@ class VerificationStorage {
         }
       });
 
-      // If user was already verified, create verification history for the previous account
+      
       if (user.robloxId && user.verifiedAt) {
         await VerificationHistory.create({
           userId: user.id,
@@ -50,18 +50,18 @@ class VerificationStorage {
           unlinkedAt: new Date()
         });
 
-        // Remove old mapping
+        
         this.robloxToDiscord.delete(user.robloxId);
       }
 
-      // Update user with new verification
+      
       await user.update({
         robloxId,
         robloxUsername,
         verifiedAt: new Date()
       });
 
-      // Update in-memory cache
+      
       const userData: VerifiedUser = {
         discordId,
         robloxId,
@@ -85,7 +85,10 @@ class VerificationStorage {
       const user = await User.findOne({ where: { discordId } });
       if (!user || !user.robloxId || !user.verifiedAt) return false;
 
-      // Create verification history record
+      
+      const oldRobloxId = user.robloxId;
+
+      
       await VerificationHistory.create({
         userId: user.id,
         robloxId: user.robloxId,
@@ -94,15 +97,15 @@ class VerificationStorage {
         unlinkedAt: new Date()
       });
 
-      // Remove verification from user record
+      
       await user.update({
         robloxId: undefined,
         robloxUsername: undefined,
         verifiedAt: undefined
       });
 
-      // Update in-memory cache
-      this.robloxToDiscord.delete(user.robloxId);
+      
+      this.robloxToDiscord.delete(oldRobloxId);
       this.verifiedUsers.delete(discordId);
       
       console.log(`User ${discordId} unverified from Roblox account ${user.robloxUsername} (${user.robloxId})`);
@@ -217,7 +220,7 @@ class VerificationStorage {
     }
   }
 
-  // Initialize in-memory cache from database
+  
   async loadFromDatabase(): Promise<void> {
     try {
       const users = await User.findAll();

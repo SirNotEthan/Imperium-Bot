@@ -29,7 +29,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
   try {
     const timeframe = interaction.options.getString('timeframe') || '30d';
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -52,7 +52,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Calculate date range
+    
     let dateFilter = {};
     let timeframeText = 'All time';
     
@@ -73,7 +73,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
                      timeframe === '90d' ? 'Last 90 days' : 'All time';
     }
 
-    // Get total actions for this guild
+    
     const totalActions = await ModerationLog.count({
       where: {
         guildId: interaction.guild.id,
@@ -92,7 +92,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get action breakdown
+    
     const actionCounts = await ModerationLog.findAll({
       where: {
         guildId: interaction.guild.id,
@@ -107,7 +107,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       raw: true
     }) as any[];
 
-    // Get top moderators
+    
     const topModerators = await ModerationLog.findAll({
       where: {
         guildId: interaction.guild.id,
@@ -123,7 +123,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       raw: true
     }) as any[];
 
-    // Get recent activity (last 5 actions)
+    
     const recentActivity = await ModerationLog.findAll({
       where: {
         guildId: interaction.guild.id,
@@ -133,7 +133,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       limit: 5
     });
 
-    // Create statistics embed
+    
     const embed = new EmbedBuilder()
       .setTitle('📊 Moderation Statistics')
       .setDescription(`Statistics for **${interaction.guild.name}**`)
@@ -141,14 +141,14 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       .setThumbnail(interaction.guild.iconURL())
       .setTimestamp();
 
-    // Add timeframe and total
+    
     embed.addFields({
       name: '📅 Timeframe',
       value: `${timeframeText} • **${totalActions}** total actions`,
       inline: false
     });
 
-    // Add action breakdown
+    
     const actionBreakdown = actionCounts.map(stat => {
       const percentage = ((stat.count / totalActions) * 100).toFixed(1);
       return `${getActionEmoji(stat.action)} **${stat.action.toUpperCase()}**: ${stat.count} (${percentage}%)`;
@@ -160,7 +160,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       inline: false
     });
 
-    // Add top moderators
+    
     if (topModerators.length > 0) {
       const moderatorText = topModerators.map((mod, index) => {
         const percentage = ((mod.count / totalActions) * 100).toFixed(1);
@@ -174,7 +174,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Add recent activity
+    
     if (recentActivity.length > 0) {
       const recentText = recentActivity.map(entry => {
         const timestamp = `<t:${Math.floor(entry.createdAt.getTime() / 1000)}:R>`;
@@ -189,7 +189,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Get current active punishments
+    
     const activeBans = await ModerationLog.count({
       where: {
         guildId: interaction.guild.id,

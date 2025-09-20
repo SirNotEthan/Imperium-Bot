@@ -35,7 +35,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const reason = interaction.options.getString('reason', true);
     const durationStr = interaction.options.getString('duration');
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -47,7 +47,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Parse duration
+    
     let duration: number | undefined;
     let expiresAt: number | undefined;
     
@@ -67,7 +67,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       expiresAt = Date.now() + duration;
     }
 
-    // Check if user is already muted or timed out
+    
     const existingMute = await ModerationLog.findOne({
       where: {
         discordUserId: targetUser.id,
@@ -89,7 +89,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get or create user data
+    
     let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
     if (!userData) {
       userData = await UserModel.create({
@@ -99,10 +99,10 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Determine action type based on duration
+    
     const actionType = duration && duration <= 28 * 24 * 60 * 60 * 1000 ? 'timeout' : 'mute';
 
-    // Create moderation log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUser.id,
       guildId: interaction.guild?.id || '',
@@ -114,7 +114,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       isActive: true
     });
 
-    // Try to timeout user on Discord (if duration is provided and < 28 days)
+    
     let discordTimeoutSuccess = false;
     if (interaction.guild && duration && duration <= 28 * 24 * 60 * 60 * 1000) {
       try {
@@ -128,7 +128,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Create mute embed
+    
     const embed = new EmbedBuilder()
       .setTitle(`🔇 User ${actionType === 'timeout' ? 'Timed Out' : 'Muted'}`)
       .setDescription(`<@${targetUser.id}> has been ${actionType === 'timeout' ? 'timed out' : 'muted'}`)
@@ -166,13 +166,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send DM to user
+    
     await sendDMNotification(targetUser, actionType, reason, duration, interaction.user.tag);
 
-    // Send response
+    
     await interaction.reply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {
@@ -195,11 +195,11 @@ function parseDuration(durationStr: string): number | null {
   const unit = match[2].toLowerCase();
 
   switch (unit) {
-    case 'h': return amount * 60 * 60 * 1000; // hours
-    case 'd': return amount * 24 * 60 * 60 * 1000; // days
-    case 'w': return amount * 7 * 24 * 60 * 60 * 1000; // weeks  
-    case 'm': return amount * 30 * 24 * 60 * 60 * 1000; // months (30 days)
-    case 'y': return amount * 365 * 24 * 60 * 60 * 1000; // years
+    case 'h': return amount * 60 * 60 * 1000; 
+    case 'd': return amount * 24 * 60 * 60 * 1000; 
+    case 'w': return amount * 7 * 24 * 60 * 60 * 1000; 
+    case 'm': return amount * 30 * 24 * 60 * 60 * 1000; 
+    case 'y': return amount * 365 * 24 * 60 * 60 * 1000; 
     default: return null;
   }
 }
@@ -264,7 +264,7 @@ async function sendDMNotification(user: User, action: string, reason: string, du
 
 async function logModerationAction(interaction: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<void> {
   try {
-    // Look for a moderation log channel
+    
     if (!interaction.guild) return;
     
     const logChannels = interaction.guild.channels.cache.filter(channel => 

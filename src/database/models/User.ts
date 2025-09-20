@@ -28,7 +28,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
     
-    // Association properties
+    
     public verificationHistory?: any[];
 }
 

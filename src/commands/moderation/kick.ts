@@ -28,7 +28,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const targetUser = interaction.options.getUser('user', true);
     const reason = interaction.options.getString('reason', true);
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.KickMembers)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -40,7 +40,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get or create user data
+    
     let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
     if (!userData) {
       userData = await UserModel.create({
@@ -50,17 +50,17 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Create moderation log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUser.id,
       guildId: interaction.guild?.id || '',
       moderatorId: interaction.user.id,
       action: 'kick',
       reason,
-      isActive: false // Kicks don't have ongoing effects
+      isActive: false 
     });
 
-    // Try to kick from Discord server
+    
     let discordKickSuccess = false;
     if (interaction.guild) {
       try {
@@ -74,7 +74,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Create kick embed
+    
     const embed = new EmbedBuilder()
       .setTitle('👢 User Kicked')
       .setDescription(`<@${targetUser.id}> has been kicked from the server`)
@@ -96,15 +96,15 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send DM to user before kicking (if kick was successful)
+    
     if (discordKickSuccess) {
       await sendDMNotification(targetUser, 'kick', reason, interaction.user.tag);
     }
 
-    // Send response
+    
     await interaction.reply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {
@@ -159,7 +159,7 @@ async function sendDMNotification(user: User, action: string, reason: string, mo
 
 async function logModerationAction(interaction: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<void> {
   try {
-    // Look for a moderation log channel
+    
     if (!interaction.guild) return;
     
     const logChannels = interaction.guild.channels.cache.filter(channel => 

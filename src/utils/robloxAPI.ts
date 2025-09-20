@@ -64,7 +64,6 @@ export class RobloxAPI {
       if (response.data.data && response.data.data.length > 0) {
         const userData = response.data.data[0];
         
-        // Get additional user details
         const detailsResponse = await axios.get(`${this.BASE_URL}/v1/users/${userData.id}`);
         return detailsResponse.data;
       }
@@ -115,9 +114,6 @@ export class RobloxAPI {
 
   static async getUserGamepasses(userId: number): Promise<RobloxGamepass[]> {
     try {
-      // Note: This is a simplified approach. In reality, you'd need to check specific gamepasses
-      // For now, we'll return an empty array as the API for checking user-owned gamepasses
-      // requires more complex implementation with specific gamepass IDs
       return [];
     } catch (error) {
       console.error('Error fetching user gamepasses:', error);
@@ -131,9 +127,6 @@ export class RobloxAPI {
     gameBans: number;
   }> {
     try {
-      // Note: Roblox doesn't provide public APIs for moderation history
-      // This would need to be implemented with your own tracking system
-      // For now, returning placeholder data
       return {
         warnings: 0,
         communityBans: 0,
@@ -157,7 +150,6 @@ export class RobloxAPI {
         return userGroups;
       }
       
-      // Filter groups to only show community-related ones
       return userGroups.filter(userGroup => 
         communityGroupIds.includes(userGroup.group.id)
       );
@@ -169,8 +161,6 @@ export class RobloxAPI {
 
   static async getCommunityGamepasses(userId: number, communityGamepassIds: number[] = []): Promise<RobloxGamepass[]> {
     try {
-      // This would need to be implemented with specific gamepass checking
-      // For now, returning empty array
       return [];
     } catch (error) {
       console.error('Error fetching community gamepasses:', error);

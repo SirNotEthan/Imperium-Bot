@@ -8,7 +8,7 @@ interface ModerationLogAttributes {
     moderatorId: string;
     action: 'ban' | 'unban' | 'mute' | 'unmute' | 'kick' | 'timeout' | 'untimeout' | 'gameban' | 'warning' | 'communityban';
     reason: string;
-    duration?: number; // in milliseconds
+    duration?: number;
     expiresAt?: Date;
     isActive: boolean;
     createdAt?: Date;

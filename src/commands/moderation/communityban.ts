@@ -53,7 +53,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Check existing community bans
+    
     const existingCommunityBans = await ModerationLog.findAll({
       where: {
         discordUserId: targetUser.id,
@@ -65,7 +65,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     });
 
     if (action === 'add') {
-      // Get or create user data
+      
       let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
       if (!userData) {
         userData = await UserModel.create({
@@ -75,7 +75,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         });
       }
 
-      // Create community ban log entry
+      
       const moderationAction = await ModerationLog.create({
         discordUserId: targetUser.id,
         guildId: interaction.guild?.id || '',
@@ -85,7 +85,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         isActive: true
       });
 
-      // Create community ban embed
+      
       const embed = new EmbedBuilder()
         .setTitle('🚫 Community Ban Added')
         .setDescription(`<@${targetUser.id}> has received a community ban`)
@@ -100,16 +100,16 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         .setTimestamp()
         .setFooter({ text: `Case ID: ${moderationAction.id}` });
 
-      // Send DM to user
+      
       await sendDMNotification(targetUser, 'communityban', 'add', reason, interaction.user.tag);
 
-      // Send response
+      
       await interaction.reply({ embeds: [embed] });
 
-      // Log to moderation channel if configured
+      
       await logModerationAction(interaction, embed);
 
-    } else { // remove
+    } else { 
       if (existingCommunityBans.length === 0) {
         const embed = new EmbedBuilder()
           .setTitle('❌ No Community Bans Found')
@@ -121,11 +121,11 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         return;
       }
 
-      // Deactivate the most recent community ban
+      
       const mostRecentBan = existingCommunityBans[0];
       await mostRecentBan.update({ isActive: false });
 
-      // Create community ban removal log entry
+      
       const moderationAction = await ModerationLog.create({
         discordUserId: targetUser.id,
         guildId: interaction.guild?.id || '',
@@ -135,7 +135,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         isActive: true
       });
 
-      // Create community ban removal embed
+      
       const embed = new EmbedBuilder()
         .setTitle('✅ Community Ban Removed')
         .setDescription(`Community ban removed from <@${targetUser.id}>`)
@@ -151,13 +151,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         .setTimestamp()
         .setFooter({ text: `Case ID: ${moderationAction.id}` });
 
-      // Send DM to user
+      
       await sendDMNotification(targetUser, 'communityban', 'remove', reason, interaction.user.tag);
 
-      // Send response
+      
       await interaction.reply({ embeds: [embed] });
 
-      // Log to moderation channel if configured
+      
       await logModerationAction(interaction, embed);
     }
 

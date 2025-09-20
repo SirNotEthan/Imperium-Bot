@@ -71,7 +71,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const action = interaction.options.getString('action');
     const limit = interaction.options.getInteger('limit') || 20;
 
-    // Build query conditions
+    
     const whereClause: any = {
       guildId: interaction.guild?.id || ''
     };
@@ -88,7 +88,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       whereClause.action = action;
     }
 
-    // Get command history
+    
     const commandHistory = await ModerationLog.findAll({
       where: whereClause,
       order: [['createdAt', 'DESC']],
@@ -106,14 +106,14 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Create history embed
+    
     const embed = new EmbedBuilder()
       .setTitle('Staff Command History')
       .setColor(0x00AFF4)
       .setTimestamp()
       .setFooter({ text: `Showing ${commandHistory.length} result${commandHistory.length !== 1 ? 's' : ''}` });
 
-    // Add filter information
+    
     const filters = [];
     if (moderator) filters.push(`**Moderator:** ${moderator.tag}`);
     if (target) filters.push(`**Target:** ${target.tag}`);
@@ -123,7 +123,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       embed.setDescription(`**Filters Applied:**\n${filters.join('\n')}\n\u200B`);
     }
 
-    // Group commands by chunks for embed fields
+    
     const commandChunks = [];
     for (let i = 0; i < commandHistory.length; i += 5) {
       commandChunks.push(commandHistory.slice(i, i + 5));
@@ -168,7 +168,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Add statistics
+    
     const stats = await getCommandStats(whereClause);
     if (stats.length > 0) {
       const statsText = stats.map(stat => `**${stat.action}:** ${stat.count}`).join(' • ');

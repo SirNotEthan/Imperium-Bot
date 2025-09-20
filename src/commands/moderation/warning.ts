@@ -53,7 +53,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Check existing warnings
+    
     const existingWarnings = await ModerationLog.findAll({
       where: {
         discordUserId: targetUser.id,
@@ -65,7 +65,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     });
 
     if (action === 'add') {
-      // Get or create user data
+      
       let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
       if (!userData) {
         userData = await UserModel.create({
@@ -75,7 +75,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         });
       }
 
-      // Create warning log entry
+      
       const moderationAction = await ModerationLog.create({
         discordUserId: targetUser.id,
         guildId: interaction.guild?.id || '',
@@ -85,7 +85,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         isActive: true
       });
 
-      // Create warning embed
+      
       const embed = new EmbedBuilder()
         .setTitle('⚠️ Warning Added')
         .setDescription(`<@${targetUser.id}> has received a warning`)
@@ -100,16 +100,16 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         .setTimestamp()
         .setFooter({ text: `Case ID: ${moderationAction.id}` });
 
-      // Send DM to user
+      
       await sendDMNotification(targetUser, 'warning', 'add', reason, interaction.user.tag);
 
-      // Send response
+      
       await interaction.reply({ embeds: [embed] });
 
-      // Log to moderation channel if configured
+      
       await logModerationAction(interaction, embed);
 
-    } else { // remove
+    } else { 
       if (existingWarnings.length === 0) {
         const embed = new EmbedBuilder()
           .setTitle('❌ No Warnings Found')
@@ -121,11 +121,11 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         return;
       }
 
-      // Deactivate the most recent warning
+      
       const mostRecentWarning = existingWarnings[0];
       await mostRecentWarning.update({ isActive: false });
 
-      // Create warning removal log entry
+      
       const moderationAction = await ModerationLog.create({
         discordUserId: targetUser.id,
         guildId: interaction.guild?.id || '',
@@ -135,7 +135,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         isActive: true
       });
 
-      // Create warning removal embed
+      
       const embed = new EmbedBuilder()
         .setTitle('✅ Warning Removed')
         .setDescription(`Warning removed from <@${targetUser.id}>`)
@@ -151,13 +151,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         .setTimestamp()
         .setFooter({ text: `Case ID: ${moderationAction.id}` });
 
-      // Send DM to user
+      
       await sendDMNotification(targetUser, 'warning', 'remove', reason, interaction.user.tag);
 
-      // Send response
+      
       await interaction.reply({ embeds: [embed] });
 
-      // Log to moderation channel if configured
+      
       await logModerationAction(interaction, embed);
     }
 

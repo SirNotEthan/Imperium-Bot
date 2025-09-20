@@ -17,7 +17,7 @@ export default {
     try {
       const userId = interaction.user.id;
 
-      // Check if user is already verified
+      
       if (await verificationStorage.isDiscordVerified(userId)) {
         const verifiedUser = await verificationStorage.getVerifiedUser(userId);
         const embed = new EmbedBuilder()
@@ -33,14 +33,14 @@ export default {
         return;
       }
 
-      // Generate verification code
+      
       const verificationCode = generateVerificationCode();
       const timestamp = Date.now();
 
-      // Store pending verification
+      
       pendingVerifications.set(userId, { code: verificationCode, timestamp });
 
-      // Clean up old pending verifications (older than 10 minutes)
+      
       for (const [key, value] of pendingVerifications.entries()) {
         if (timestamp - value.timestamp > 10 * 60 * 1000) {
           pendingVerifications.delete(key);
@@ -59,7 +59,7 @@ export default {
           },
           { 
             name: '2️⃣ Add it to your Roblox profile description:', 
-            value: '• Go to [Roblox.com](https://www.roblox.com)\n• Click on your profile\n• Click "Edit Profile"\n• Add the code to your description\n• Save your profile', 
+            value: '• Go to [Roblox.com](https://www.roblox.com) and edit your profile\n• Add the code above to your description\n• Save your profile and click "Complete Verification"',
             inline: false 
           },
           { 
@@ -70,11 +70,11 @@ export default {
         )
         .setFooter({ 
           text: 'This code expires in 10 minutes',
-          iconURL: 'https://www.roblox.com/favicon.ico'
+          iconURL: 'https://cdn.discordapp.com/emojis/123456789012345678.png'
         })
         .setTimestamp();
 
-      // Create verification button
+      
       const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(
           new ButtonBuilder()
@@ -110,7 +110,7 @@ export default {
     }
   },
 
-  // Handle verification completion
+  
   async handleVerificationComplete(interaction: any, userId: string): Promise<void> {
     try {
       const pending = pendingVerifications.get(userId);
@@ -124,7 +124,7 @@ export default {
         return;
       }
 
-      // Check if code expired (10 minutes)
+      
       if (Date.now() - pending.timestamp > 10 * 60 * 1000) {
         pendingVerifications.delete(userId);
         const embed = new EmbedBuilder()
@@ -136,7 +136,7 @@ export default {
         return;
       }
 
-      // Show modal for Roblox username input
+      
       const modal = new ModalBuilder()
         .setCustomId(`verify_username_${userId}`)
         .setTitle('Roblox Username');
@@ -174,7 +174,7 @@ export default {
     }
   },
 
-  // Handle username modal submission
+  
   async handleUsernameModal(interaction: any, userId: string): Promise<void> {
     try {
       await interaction.deferReply({ ephemeral: true });
@@ -192,7 +192,7 @@ export default {
 
       const robloxUsername = interaction.fields.getTextInputValue('roblox_username');
 
-      // Fetch Roblox user data
+      
       const robloxUser = await RobloxAPI.getUserByUsername(robloxUsername);
       if (!robloxUser) {
         const embed = new EmbedBuilder()
@@ -204,7 +204,7 @@ export default {
         return;
       }
 
-      // Check if Roblox account is already linked
+      
       if (await verificationStorage.isRobloxLinked(robloxUser.id)) {
         const embed = new EmbedBuilder()
           .setTitle('❌ Account Already Linked')
@@ -215,7 +215,7 @@ export default {
         return;
       }
 
-      // Check if verification code is in description
+      
       if (!robloxUser.description.includes(pending.code)) {
         const embed = new EmbedBuilder()
           .setTitle('❌ Verification Code Not Found')
@@ -229,7 +229,7 @@ export default {
         return;
       }
 
-      // Complete verification
+      
       const success = await verificationStorage.verifyUser(userId, robloxUser.id, robloxUser.name);
       if (!success) {
         const embed = new EmbedBuilder()
@@ -241,10 +241,10 @@ export default {
         return;
       }
 
-      // Clean up pending verification
+      
       pendingVerifications.delete(userId);
 
-      // Update Discord nickname
+      
       let nicknameUpdated = false;
       if (interaction.guild) {
         try {
@@ -260,7 +260,7 @@ export default {
         }
       }
 
-      // Get user thumbnail
+      
       const thumbnail = await RobloxAPI.getUserThumbnail(robloxUser.id);
       const accountAge = RobloxAPI.calculateAccountAge(robloxUser.created);
 
@@ -278,7 +278,7 @@ export default {
         .setThumbnail(thumbnail || '')
         .setFooter({ 
           text: 'Your account is now verified!',
-          iconURL: 'https://www.roblox.com/favicon.ico'
+          iconURL: 'https://cdn.discordapp.com/emojis/123456789012345678.png'
         })
         .setTimestamp();
 
@@ -296,6 +296,6 @@ export default {
     }
   },
 
-  // Export for external access
+  
   pendingVerifications
 };

@@ -11,7 +11,7 @@ export default {
     try {
       const userId = interaction.user.id;
 
-      // Check if user is verified
+      
       const verifiedUser = await verificationStorage.getVerifiedUser(userId);
       if (!verifiedUser) {
         const embed = new EmbedBuilder()
@@ -26,7 +26,7 @@ export default {
         return;
       }
 
-      // Show confirmation with current verification details
+      
       const accountAge = RobloxAPI.calculateAccountAge(verifiedUser.verifiedAt.toISOString());
       const thumbnail = await RobloxAPI.getUserThumbnail(verifiedUser.robloxId);
 
@@ -48,7 +48,7 @@ export default {
         .setThumbnail(thumbnail || '')
         .setFooter({ 
           text: 'This action can be reversed by using /verify again',
-          iconURL: 'https://www.roblox.com/favicon.ico'
+          iconURL: 'https://cdn.discordapp.com/emojis/123456789012345678.png'
         });
 
       const row = new ActionRowBuilder<ButtonBuilder>()
@@ -83,7 +83,7 @@ export default {
     }
   },
 
-  // Handle unverification confirmation
+  
   async handleUnverifyConfirm(interaction: any, userId: string): Promise<void> {
     try {
       await interaction.deferReply({ ephemeral: true });
@@ -99,11 +99,11 @@ export default {
         return;
       }
 
-      // Store data for confirmation message before unverifying
+      
       const robloxUsername = verifiedUser.robloxUsername;
       const robloxId = verifiedUser.robloxId;
 
-      // Unverify the user
+      
       const success = await verificationStorage.unverifyUser(userId);
       if (!success) {
         const embed = new EmbedBuilder()
@@ -115,7 +115,7 @@ export default {
         return;
       }
 
-      // Try to reset Discord nickname
+      
       let nicknameReset = false;
       if (interaction.guild) {
         try {
@@ -131,7 +131,7 @@ export default {
         }
       }
 
-      // Success message
+      
       const successEmbed = new EmbedBuilder()
         .setTitle('✅ Successfully Unverified')
         .setDescription(`Your Discord account has been unlinked from **${robloxUsername}**`)
@@ -145,7 +145,7 @@ export default {
         )
         .setFooter({ 
           text: 'Unverification completed successfully',
-          iconURL: 'https://www.roblox.com/favicon.ico'
+          iconURL: 'https://cdn.discordapp.com/emojis/123456789012345678.png'
         })
         .setTimestamp();
 
@@ -163,7 +163,7 @@ export default {
     }
   },
 
-  // Handle unverification cancellation
+  
   async handleUnverifyCancel(interaction: any, userId: string): Promise<void> {
     try {
       const embed = new EmbedBuilder()

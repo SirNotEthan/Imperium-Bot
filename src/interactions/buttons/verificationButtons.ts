@@ -8,11 +8,11 @@ export default {
   async execute(interaction: ButtonInteraction) {
     const customId = interaction.customId;
     
-    // Parse the custom ID to get action and user ID
+    
     if (customId.startsWith('verify_complete_')) {
       const userId = customId.replace('verify_complete_', '');
       
-      // Verify this is the correct user
+      
       if (userId !== interaction.user.id) {
         try {
           await interaction.reply({ 
@@ -30,7 +30,7 @@ export default {
     } else if (customId.startsWith('unverify_confirm_')) {
       const userId = customId.replace('unverify_confirm_', '');
       
-      // Verify this is the correct user
+      
       if (userId !== interaction.user.id) {
         try {
           await interaction.reply({ 
@@ -48,7 +48,7 @@ export default {
     } else if (customId.startsWith('unverify_cancel_')) {
       const userId = customId.replace('unverify_cancel_', '');
       
-      // Verify this is the correct user
+      
       if (userId !== interaction.user.id) {
         try {
           await interaction.reply({ 

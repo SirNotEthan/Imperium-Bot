@@ -20,10 +20,8 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const targetUser = interaction.options.getUser('user');
 
     if (targetUser) {
-      // Show specific user's stats
       await showUserStats(interaction, targetUser);
     } else {
-      // Show leaderboard
       await showLeaderboard(interaction);
     }
 
@@ -64,8 +62,7 @@ async function showUserStats(interaction: ChatInputCommandInteraction, user: Use
     let description = `**Total Messages:** ${userStats.messageCount.toLocaleString()}\n`;
     description += `**Last Active:** <t:${Math.floor(userStats.lastMessageAt / 1000)}:R>\n`;
 
-    // Get user's rank in leaderboard
-    const topUsers = dataStorage.getTopMessagers(1000); // Get enough to find rank
+    const topUsers = dataStorage.getTopMessagers(1000);
     const userRank = topUsers.findIndex(stats => stats.userId === user.id) + 1;
     
     if (userRank > 0) {
@@ -74,7 +71,6 @@ async function showUserStats(interaction: ChatInputCommandInteraction, user: Use
 
     embed.setDescription(description);
 
-    // Add verification info if available
     if (userData?.robloxUsername) {
       embed.addFields({
         name: '🎮 Roblox Account',
@@ -91,7 +87,7 @@ async function showUserStats(interaction: ChatInputCommandInteraction, user: Use
     await interaction.reply({
       content: 'Failed to fetch user statistics. Please try again later.',
       ephemeral: true
-    }).catch(() => {}); // Ignore final error
+    }).catch(() => {});
   }
 }
 
@@ -116,15 +112,12 @@ async function showLeaderboard(interaction: ChatInputCommandInteraction): Promis
       let displayName = `User ID: ${userStats.userId}`;
       let robloxInfo = '';
 
-      // Try to get Discord user
       try {
         const discordUser = await interaction.client.users.fetch(userStats.userId);
         displayName = discordUser.username;
       } catch (error) {
-        // User not found, keep the ID
       }
 
-      // Get Roblox username if available
       const userData = dataStorage.getUser(userStats.userId);
       if (userData?.robloxUsername) {
         robloxInfo = ` (${userData.robloxUsername})`;
@@ -142,7 +135,6 @@ async function showLeaderboard(interaction: ChatInputCommandInteraction): Promis
       inline: false
     });
 
-    // Add total stats
     const totalMessages = topUsers.reduce((sum, user) => sum + user.messageCount, 0);
     embed.addFields({
       name: '📊 Server Stats',
@@ -150,14 +142,12 @@ async function showLeaderboard(interaction: ChatInputCommandInteraction): Promis
       inline: true
     });
 
-    // Add your rank if you're not in top 10
     const requesterId = interaction.user.id;
     const requesterRank = topUsers.findIndex(stats => stats.userId === requesterId) + 1;
     
     if (requesterRank === 0) {
       const requesterStats = dataStorage.getUserStats(requesterId);
       if (requesterStats) {
-        // Find actual rank
         const allUsers = dataStorage.getTopMessagers(1000);
         const actualRank = allUsers.findIndex(stats => stats.userId === requesterId) + 1;
         
@@ -188,7 +178,7 @@ async function showLeaderboard(interaction: ChatInputCommandInteraction): Promis
     await interaction.reply({
       content: 'Failed to fetch message leaderboard. Please try again later.',
       ephemeral: true
-    }).catch(() => {}); // Ignore final error
+    }).catch(() => {});
   }
 }
 

@@ -29,7 +29,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const targetUser = interaction.options.getUser('user', true);
     const limit = interaction.options.getInteger('limit') || 10;
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -41,7 +41,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get moderation history
+    
     const moderationHistory = await ModerationLog.findAll({
       where: {
         discordUserId: targetUser.id,
@@ -63,7 +63,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get active actions
+    
     const activeBan = await ModerationLog.findOne({
       where: {
         discordUserId: targetUser.id,
@@ -84,7 +84,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       order: [['createdAt', 'DESC']]
     });
 
-    // Create history embed
+    
     const embed = new EmbedBuilder()
       .setTitle('📋 Moderation History')
       .setDescription(`Moderation history for <@${targetUser.id}>`)
@@ -92,7 +92,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       .setThumbnail(targetUser.displayAvatarURL())
       .setTimestamp();
 
-    // Add active status
+    
     let statusText = '✅ Clean';
     if (activeBan && (!activeBan.expiresAt || activeBan.expiresAt > new Date())) {
       statusText = '🔨 Banned';
@@ -113,7 +113,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       inline: false
     });
 
-    // Add recent history
+    
     const historyText = moderationHistory.map((entry, index) => {
       const timestamp = `<t:${Math.floor(entry.createdAt.getTime() / 1000)}:f>`;
       const actionEmoji = getActionEmoji(entry.action);
@@ -132,7 +132,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       inline: false
     });
 
-    // Add statistics
+    
     const totalActions = await ModerationLog.count({
       where: { 
         discordUserId: targetUser.id,

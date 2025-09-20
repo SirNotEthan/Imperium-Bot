@@ -43,7 +43,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Check if user is currently timed out
+    
     const existingTimeout = await ModerationLog.findOne({
       where: {
         discordUserId: targetUser.id,
@@ -65,10 +65,10 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Deactivate the timeout log entry
+    
     await existingTimeout.update({ isActive: false });
 
-    // Get or create user data
+    
     let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
     if (!userData) {
       userData = await UserModel.create({
@@ -78,7 +78,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Create untimeout log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUser.id,
       guildId: interaction.guild?.id || '',
@@ -88,7 +88,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       isActive: true
     });
 
-    // Try to remove timeout in Discord
+    
     let discordUntimeoutSuccess = false;
     if (interaction.guild) {
       try {
@@ -100,7 +100,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Create untimeout embed
+    
     const embed = new EmbedBuilder()
       .setTitle('✅ Timeout Removed')
       .setDescription(`<@${targetUser.id}>'s timeout has been removed`)
@@ -123,13 +123,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send DM to user
+    
     await sendDMNotification(targetUser, reason, interaction.user.tag);
 
-    // Send response
+    
     await interaction.reply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {

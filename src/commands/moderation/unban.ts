@@ -27,7 +27,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const userInput = interaction.options.getString('user', true);
     const reason = interaction.options.getString('reason', true);
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.BanMembers)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -42,16 +42,16 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     let targetUserId: string;
     let targetUser: any = null;
 
-    // Try to parse as user ID first
+    
     if (/^\d{17,19}$/.test(userInput)) {
       targetUserId = userInput;
       try {
         targetUser = await interaction.client.users.fetch(targetUserId);
       } catch (error) {
-        // User not found, but that's okay for unbanning
+        
       }
     } else {
-      // Try to find by Roblox username
+      
       const userData = await UserModel.findOne({ where: { robloxUsername: userInput } });
       if (!userData) {
         const embed = new EmbedBuilder()
@@ -67,11 +67,11 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       try {
         targetUser = await interaction.client.users.fetch(targetUserId);
       } catch (error) {
-        // User not found, but that's okay for unbanning
+        
       }
     }
 
-    // Check if user is banned
+    
     const existingBan = await ModerationLog.findOne({
       where: {
         discordUserId: targetUserId,
@@ -94,20 +94,20 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Mark the existing ban as inactive
+    
     await existingBan.update({ isActive: false });
 
-    // Create unban moderation log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUserId,
       guildId: interaction.guild?.id || '',
       moderatorId: interaction.user.id,
       action: 'unban',
       reason,
-      isActive: false // Unbans don't have ongoing effects
+      isActive: false 
     });
 
-    // Try to unban from Discord server
+    
     let discordUnbanSuccess = false;
     if (interaction.guild) {
       try {
@@ -118,12 +118,12 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Get user info for embed
+    
     const userData = await UserModel.findOne({ where: { discordId: targetUserId } });
     const displayName = targetUser ? targetUser.tag : (userData?.robloxUsername || `User ID: ${targetUserId}`);
     const displayId = targetUser ? targetUser.id : targetUserId;
 
-    // Create unban embed
+    
     const embed = new EmbedBuilder()
       .setTitle('✅ User Unbanned')
       .setDescription(`**${displayName}** has been unbanned`)
@@ -149,10 +149,10 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send response
+    
     await interaction.reply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {
@@ -169,7 +169,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
 
 async function logModerationAction(interaction: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<void> {
   try {
-    // Look for a moderation log channel
+    
     if (!interaction.guild) return;
     
     const logChannels = interaction.guild.channels.cache.filter(channel => 

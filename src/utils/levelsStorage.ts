@@ -14,7 +14,6 @@ interface LevelConfig {
 class LevelsStorage {
   private userLevels: Map<string, UserLevelData> = new Map();
   private levelConfigs: LevelConfig[] = [];
-  private readonly MESSAGE_COOLDOWN = 60000; // 1 minute cooldown between counting messages
   private readonly MAX_LEVEL = 100;
 
   constructor() {
@@ -22,7 +21,7 @@ class LevelsStorage {
   }
 
   private initializeLevelConfigs(): void {
-    // Progressive message requirements - more messages needed as level increases
+    
     for (let level = 1; level <= this.MAX_LEVEL; level++) {
       const messagesRequired = this.calculateMessagesForLevel(level);
       this.levelConfigs.push({
@@ -33,23 +32,22 @@ class LevelsStorage {
   }
 
   private calculateMessagesForLevel(level: number): number {
-    // Exponential scaling: 10 * level^1.5, rounded to nearest 10
+    
     const base = Math.floor(10 * Math.pow(level, 1.5) / 10) * 10;
-    return Math.max(base, 10); // Minimum 10 messages per level
+    return Math.max(base, 10); 
   }
 
-  addMessage(discordId: string): { leveledUp: boolean; newLevel?: number; oldLevel?: number } {
+  addMessage(discordId: string, messageContent: string): { leveledUp: boolean; newLevel?: number; oldLevel?: number } {
     const userData = this.getUserData(discordId);
-    const now = Date.now();
 
-    // Check cooldown
-    if (now - userData.lastMessageTime < this.MESSAGE_COOLDOWN) {
+    
+    if (messageContent.trim().length <= 2) {
       return { leveledUp: false };
     }
 
     const oldLevel = userData.level;
     userData.messageCount++;
-    userData.lastMessageTime = now;
+    userData.lastMessageTime = Date.now();
 
     const newLevel = this.calculateLevel(userData.messageCount);
     const leveledUp = newLevel > oldLevel;
@@ -112,7 +110,7 @@ class LevelsStorage {
     const currentLevel = userData.level;
     const nextLevel = Math.min(currentLevel + 1, this.MAX_LEVEL);
     
-    // Calculate total messages required up to current level
+    
     let totalMessagesForCurrent = 0;
     for (let i = 1; i <= currentLevel; i++) {
       const config = this.levelConfigs.find(c => c.level === i);
@@ -121,7 +119,7 @@ class LevelsStorage {
       }
     }
 
-    // Calculate total messages required for next level
+    
     let totalMessagesForNext = totalMessagesForCurrent;
     const nextLevelConfig = this.levelConfigs.find(c => c.level === nextLevel);
     if (nextLevelConfig) {
@@ -146,9 +144,9 @@ class LevelsStorage {
     return Array.from(this.userLevels.values())
       .sort((a, b) => {
         if (a.level !== b.level) {
-          return b.level - a.level; // Higher level first
+          return b.level - a.level; 
         }
-        return b.messageCount - a.messageCount; // More messages first if same level
+        return b.messageCount - a.messageCount; 
       })
       .slice(0, limit);
   }

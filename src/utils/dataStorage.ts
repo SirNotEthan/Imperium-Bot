@@ -7,9 +7,9 @@ export interface ModerationAction {
   moderatorId: string;
   action: 'ban' | 'unban' | 'mute' | 'unmute';
   reason: string;
-  duration?: number; // in milliseconds
+  duration?: number;
   timestamp: number;
-  expiresAt?: number; // for timed actions
+  expiresAt?: number;
 }
 
 export interface UserStats {
@@ -22,7 +22,7 @@ export interface UserData {
   userId: string;
   robloxId?: number;
   robloxUsername?: string;
-  verificationHistory: string[]; // Previous roblox usernames
+  verificationHistory: string[];
   isBanned: boolean;
   isMuted: boolean;
   banExpiresAt?: number;
@@ -46,24 +46,20 @@ class DataStorage {
 
   private loadData(): void {
     try {
-      // Create data directory if it doesn't exist
       const dataDir = join(process.cwd(), 'data');
       if (!existsSync(dataDir)) {
         require('fs').mkdirSync(dataDir, { recursive: true });
       }
 
-      // Load user data
       if (existsSync(this.dataPath)) {
         const data = JSON.parse(readFileSync(this.dataPath, 'utf-8'));
         this.userData = new Map(data.map((user: UserData) => [user.userId, user]));
       }
 
-      // Load moderation logs
       if (existsSync(this.moderationPath)) {
         this.moderationLogs = JSON.parse(readFileSync(this.moderationPath, 'utf-8'));
       }
 
-      // Load user stats
       if (existsSync(this.statsPath)) {
         const data = JSON.parse(readFileSync(this.statsPath, 'utf-8'));
         this.userStats = new Map(data.map((stat: UserStats) => [stat.userId, stat]));
@@ -75,14 +71,11 @@ class DataStorage {
 
   private saveData(): void {
     try {
-      // Save user data
       const userData = Array.from(this.userData.values());
       writeFileSync(this.dataPath, JSON.stringify(userData, null, 2));
 
-      // Save moderation logs
       writeFileSync(this.moderationPath, JSON.stringify(this.moderationLogs, null, 2));
 
-      // Save user stats
       const userStats = Array.from(this.userStats.values());
       writeFileSync(this.statsPath, JSON.stringify(userStats, null, 2));
     } catch (error) {
@@ -90,7 +83,6 @@ class DataStorage {
     }
   }
 
-  // User Data Methods
   getUser(userId: string): UserData | undefined {
     return this.userData.get(userId);
   }
@@ -113,7 +105,6 @@ class DataStorage {
   updateUser(userId: string, updates: Partial<UserData>): void {
     const user = this.userData.get(userId);
     if (user) {
-      // If updating roblox username, add to history
       if (updates.robloxUsername && updates.robloxUsername !== user.robloxUsername) {
         user.verificationHistory.push(updates.robloxUsername);
       }
@@ -142,7 +133,6 @@ class DataStorage {
     return undefined;
   }
 
-  // Moderation Methods
   addModerationAction(action: Omit<ModerationAction, 'id' | 'timestamp'>): ModerationAction {
     const moderationAction: ModerationAction = {
       ...action,
@@ -163,7 +153,6 @@ class DataStorage {
     const user = this.getUser(userId);
     if (!user?.isBanned) return undefined;
 
-    // Check if ban is expired
     if (user.banExpiresAt && Date.now() > user.banExpiresAt) {
       this.updateUser(userId, { isBanned: false, banExpiresAt: undefined });
       return undefined;
@@ -178,7 +167,6 @@ class DataStorage {
     const user = this.getUser(userId);
     if (!user?.isMuted) return undefined;
 
-    // Check if mute is expired
     if (user.muteExpiresAt && Date.now() > user.muteExpiresAt) {
       this.updateUser(userId, { isMuted: false, muteExpiresAt: undefined });
       return undefined;
@@ -189,7 +177,6 @@ class DataStorage {
       .sort((a, b) => b.timestamp - a.timestamp)[0];
   }
 
-  // Message Stats Methods
   incrementMessageCount(userId: string): void {
     const stats = this.userStats.get(userId) || {
       userId,
@@ -213,11 +200,9 @@ class DataStorage {
       .slice(0, limit);
   }
 
-  // Utility Methods
   cleanupExpiredActions(): void {
     const now = Date.now();
     
-    // Clean up expired bans and mutes
     for (const [userId, user] of this.userData.entries()) {
       let updated = false;
       
@@ -249,7 +234,6 @@ class DataStorage {
 
 export const dataStorage = new DataStorage();
 
-// Clean up expired actions every 5 minutes
 setInterval(() => {
   dataStorage.cleanupExpiredActions();
 }, 5 * 60 * 1000);

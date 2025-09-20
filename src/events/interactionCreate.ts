@@ -67,7 +67,6 @@ async function handleButtonInteraction(interaction: ButtonInteraction): Promise<
   const client = interaction.client as Client & { buttons?: Collection<string, any> };
 
   try {
-    // Handle verification-related buttons
     if (interaction.customId.startsWith('verify_complete_') || 
         interaction.customId.startsWith('unverify_confirm_') || 
         interaction.customId.startsWith('unverify_cancel_')) {
@@ -77,14 +76,10 @@ async function handleButtonInteraction(interaction: ButtonInteraction): Promise<
       return;
     }
 
-    // Handle ping refresh button
     if (interaction.customId === 'ping_refresh') {
-      // This is handled by the ping command's collector
-      // The collector should handle this, so we don't need to do anything here
       return;
     }
 
-    // Check if we have a button handler registered
     if (client.buttons?.has(interaction.customId)) {
       const buttonHandler = client.buttons.get(interaction.customId);
       await buttonHandler.execute(interaction);
@@ -115,7 +110,6 @@ async function handleSelectMenuInteraction(interaction: StringSelectMenuInteract
   const client = interaction.client as Client & { selectMenus?: Collection<string, any> };
 
   try {
-    // Check if we have a select menu handler registered
     if (client.selectMenus?.has(interaction.customId)) {
       const selectMenuHandler = client.selectMenus.get(interaction.customId);
       await selectMenuHandler.execute(interaction);
@@ -146,14 +140,12 @@ async function handleModalInteraction(interaction: ModalSubmitInteraction): Prom
   const client = interaction.client as Client & { modals?: Collection<string, any> };
 
   try {
-    // Handle verification-related modals
     if (interaction.customId.startsWith('verify_username_')) {
       const { default: verificationModals } = await import('../interactions/modals/verificationModals');
       await verificationModals.execute(interaction);
       return;
     }
 
-    // Check if we have a modal handler registered
     if (client.modals?.has(interaction.customId)) {
       const modalHandler = client.modals.get(interaction.customId);
       await modalHandler.execute(interaction);

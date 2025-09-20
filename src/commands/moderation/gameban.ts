@@ -53,7 +53,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Check existing game bans
+    
     const existingGameBans = await ModerationLog.findAll({
       where: {
         discordUserId: targetUser.id,
@@ -65,7 +65,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     });
 
     if (action === 'add') {
-      // Get or create user data
+      
       let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
       if (!userData) {
         userData = await UserModel.create({
@@ -75,7 +75,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         });
       }
 
-      // Create game ban log entry
+      
       const moderationAction = await ModerationLog.create({
         discordUserId: targetUser.id,
         guildId: interaction.guild?.id || '',
@@ -85,7 +85,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         isActive: true
       });
 
-      // Create game ban embed
+      
       const embed = new EmbedBuilder()
         .setTitle('🎮 Game Ban Added')
         .setDescription(`<@${targetUser.id}> has received a game ban`)
@@ -100,16 +100,16 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         .setTimestamp()
         .setFooter({ text: `Case ID: ${moderationAction.id}` });
 
-      // Send DM to user
+      
       await sendDMNotification(targetUser, 'gameban', 'add', reason, interaction.user.tag);
 
-      // Send response
+      
       await interaction.reply({ embeds: [embed] });
 
-      // Log to moderation channel if configured
+      
       await logModerationAction(interaction, embed);
 
-    } else { // remove
+    } else { 
       if (existingGameBans.length === 0) {
         const embed = new EmbedBuilder()
           .setTitle('❌ No Game Bans Found')
@@ -121,11 +121,11 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         return;
       }
 
-      // Deactivate the most recent game ban
+      
       const mostRecentBan = existingGameBans[0];
       await mostRecentBan.update({ isActive: false });
 
-      // Create game ban removal log entry
+      
       const moderationAction = await ModerationLog.create({
         discordUserId: targetUser.id,
         guildId: interaction.guild?.id || '',
@@ -135,7 +135,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         isActive: true
       });
 
-      // Create game ban removal embed
+      
       const embed = new EmbedBuilder()
         .setTitle('✅ Game Ban Removed')
         .setDescription(`Game ban removed from <@${targetUser.id}>`)
@@ -151,13 +151,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
         .setTimestamp()
         .setFooter({ text: `Case ID: ${moderationAction.id}` });
 
-      // Send DM to user
+      
       await sendDMNotification(targetUser, 'gameban', 'remove', reason, interaction.user.tag);
 
-      // Send response
+      
       await interaction.reply({ embeds: [embed] });
 
-      // Log to moderation channel if configured
+      
       await logModerationAction(interaction, embed);
     }
 

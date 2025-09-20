@@ -85,7 +85,6 @@ export default {
         );
       }
 
-      // Add moderation records if user is linked to Discord
       if (moderationRecords) {
         embed.addFields(
           { name: 'Moderation Records', value: '\u200B', inline: false },
@@ -94,8 +93,21 @@ export default {
           { name: 'Game Bans', value: moderationRecords.gameBans.toString(), inline: true }
         );
 
+        if (moderationRecords.recentHistory && moderationRecords.recentHistory.length > 0) {
+          const historyText = moderationRecords.recentHistory
+            .map(record => {
+              const timeStamp = `<t:${Math.floor(record.createdAt.getTime() / 1000)}:R>`;
+              const reasonText = record.reason.length > 50 ? record.reason.substring(0, 47) + '...' : record.reason;
+              return `**${record.action.toUpperCase()}** ${timeStamp}\n└ ${reasonText}`;
+            })
+            .join('\n\n');
+
+          embed.addFields(
+            { name: 'Recent Mod History (Last 5)', value: historyText, inline: false }
+          );
+        }
+
       } else {
-        // Fallback to static community status if not linked to Discord
         embed.addFields(
           { name: 'Community Status', value: '\u200B', inline: false },
           { name: 'Warnings', value: communityStatus.warnings.toString(), inline: true },
@@ -154,12 +166,11 @@ export default {
 
       if (userHistory?.previousAccounts && userHistory.previousAccounts.length > 0) {
         const previousAccounts = userHistory.previousAccounts
-          .slice(0, 3)
           .map(account => `• **${account.robloxUsername}** (ID: ${account.robloxId})\n  Linked: <t:${Math.floor(account.linkedAt.getTime() / 1000)}:D> - <t:${Math.floor(account.unlinkedAt.getTime() / 1000)}:D>`)
           .join('\n');
 
         embed.addFields(
-          { name: 'Previously Connected Accounts', value: previousAccounts, inline: false }
+          { name: `Previously Connected Accounts (${userHistory.previousAccounts.length})`, value: previousAccounts, inline: false }
         );
       }
 
@@ -182,19 +193,16 @@ export default {
     }
   },
 
-  // Function to update community configuration
   setCommunityConfig(groupIds: number[], gamepassIds: number[]) {
     COMMUNITY_CONFIG.groupIds = groupIds;
     COMMUNITY_CONFIG.gamepassIds = gamepassIds;
   },
 
-  // Get current community configuration
   getCommunityConfig() {
     return { ...COMMUNITY_CONFIG };
   }
 };
 
-// Helper function to get moderation records for a Discord user
 async function getModerationRecords(discordUserId: string, guildId: string) {
   try {
     const allRecords = await ModerationLog.findAll({
@@ -210,18 +218,23 @@ async function getModerationRecords(discordUserId: string, guildId: string) {
     const communityBans = allRecords.filter(record => record.action === 'communityban').length;
     const gameBans = allRecords.filter(record => record.action === 'gameban').length;
 
+    const recentHistory = allRecords.slice(0, 5);
+
     return {
       warnings,
       communityBans,
-      gameBans
+      gameBans,
+      recentHistory
     };
   } catch (error) {
     console.error('Error fetching moderation records:', error);
     return {
       warnings: 0,
       communityBans: 0,
-      gameBans: 0
+      gameBans: 0,
+      recentHistory: []
     };
   }
 }
+
 

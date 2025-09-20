@@ -34,7 +34,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const reason = interaction.options.getString('reason', true);
     const durationStr = interaction.options.getString('duration');
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.BanMembers)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -46,7 +46,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Parse duration
+    
     let duration: number | undefined;
     let expiresAt: number | undefined;
     
@@ -66,7 +66,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       expiresAt = Date.now() + duration;
     }
 
-    // Check if user is already banned
+    
     const existingBan = await ModerationLog.findOne({
       where: {
         discordUserId: targetUser.id,
@@ -88,7 +88,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Get or create user data
+    
     let userData = await UserModel.findOne({ where: { discordId: targetUser.id } });
     if (!userData) {
       userData = await UserModel.create({
@@ -98,7 +98,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Create moderation log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUser.id,
       guildId: interaction.guild?.id || '',
@@ -110,7 +110,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       isActive: true
     });
 
-    // Try to ban from Discord server
+    
     let discordBanSuccess = false;
     if (interaction.guild) {
       try {
@@ -123,7 +123,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Create ban embed
+    
     const embed = new EmbedBuilder()
       .setTitle('🔨 User Banned')
       .setDescription(`<@${targetUser.id}> has been banned`)
@@ -156,13 +156,13 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send DM to user
+    
     await sendDMNotification(targetUser, 'ban', reason, duration, interaction.user.tag);
 
-    // Send response
+    
     await interaction.reply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {
@@ -193,10 +193,10 @@ function parseDuration(durationStr: string): number | null {
   const unit = match[2].toLowerCase();
 
   switch (unit) {
-    case 'd': return amount * 24 * 60 * 60 * 1000; // days
-    case 'w': return amount * 7 * 24 * 60 * 60 * 1000; // weeks  
-    case 'm': return amount * 30 * 24 * 60 * 60 * 1000; // months (30 days)
-    case 'y': return amount * 365 * 24 * 60 * 60 * 1000; // years
+    case 'd': return amount * 24 * 60 * 60 * 1000; 
+    case 'w': return amount * 7 * 24 * 60 * 60 * 1000; 
+    case 'm': return amount * 30 * 24 * 60 * 60 * 1000; 
+    case 'y': return amount * 365 * 24 * 60 * 60 * 1000; 
     default: return null;
   }
 }
@@ -255,7 +255,7 @@ async function sendDMNotification(user: User, action: string, reason: string, du
 
 async function logModerationAction(interaction: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<void> {
   try {
-    // Look for a moderation log channel
+    
     if (!interaction.guild) return;
     
     const logChannels = interaction.guild.channels.cache.filter(channel => 

@@ -27,7 +27,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
     const targetUser = interaction.options.getUser('user', true);
     const reason = interaction.options.getString('reason', true);
 
-    // Check permissions
+    
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ModerateMembers)) {
       const embed = new EmbedBuilder()
         .setTitle('❌ Insufficient Permissions')
@@ -39,7 +39,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Check if user is muted or timed out
+    
     const existingMute = await ModerationLog.findOne({
       where: {
         discordUserId: targetUser.id,
@@ -61,20 +61,20 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       return;
     }
 
-    // Mark the existing mute/timeout as inactive
+    
     await existingMute.update({ isActive: false });
 
-    // Create unmute moderation log entry
+    
     const moderationAction = await ModerationLog.create({
       discordUserId: targetUser.id,
       guildId: interaction.guild?.id || '',
       moderatorId: interaction.user.id,
       action: 'unmute',
       reason,
-      isActive: false // Unmutes don't have ongoing effects
+      isActive: false 
     });
 
-    // Try to remove timeout from Discord
+    
     let discordUnmuteSuccess = false;
     if (interaction.guild) {
       try {
@@ -88,7 +88,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       }
     }
 
-    // Create unmute embed
+    
     const actionType = existingMute.action === 'timeout' ? 'Timeout Removed' : 'User Unmuted';
     const embed = new EmbedBuilder()
       .setTitle(`🔊 ${actionType}`)
@@ -112,10 +112,10 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
       });
     }
 
-    // Send response
+    
     await interaction.reply({ embeds: [embed] });
 
-    // Log to moderation channel if configured
+    
     await logModerationAction(interaction, embed);
 
   } catch (error) {
@@ -132,7 +132,7 @@ async function execute(interaction: ChatInputCommandInteraction): Promise<void> 
 
 async function logModerationAction(interaction: ChatInputCommandInteraction, embed: EmbedBuilder): Promise<void> {
   try {
-    // Look for a moderation log channel
+    
     if (!interaction.guild) return;
     
     const logChannels = interaction.guild.channels.cache.filter(channel => 

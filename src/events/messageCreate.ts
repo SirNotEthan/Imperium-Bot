@@ -6,15 +6,12 @@ export const once = false;
 
 export async function execute(message: Message): Promise<void> {
   try {
-    // Ignore bot messages and DMs
     if (message.author.bot || !message.guild) {
       return;
     }
 
-    // Track the message for leveling
-    const result = levelsStorage.addMessage(message.author.id);
+    const result = levelsStorage.addMessage(message.author.id, message.content);
 
-    // If user leveled up, send congratulations
     if (result.leveledUp && result.newLevel !== undefined) {
       await handleLevelUp(message, result.newLevel, result.oldLevel!);
     }
@@ -31,7 +28,6 @@ async function handleLevelUp(message: Message, newLevel: number, oldLevel: numbe
 
     let congratsMessage = `🎉 Congratulations ${member}! You've reached **Level ${newLevel}**!`;
 
-    // Add role if configured for this level
     if (levelRole && message.guild) {
       const role = message.guild.roles.cache.get(levelRole);
       if (role) {
@@ -44,7 +40,6 @@ async function handleLevelUp(message: Message, newLevel: number, oldLevel: numbe
       }
     }
 
-    // Add special messages for milestone levels
     if (newLevel === 100) {
       congratsMessage += '\n👑 **Maximum Level Achieved!** You\'re a server legend!';
     } else if (newLevel === 50) {
@@ -55,7 +50,6 @@ async function handleLevelUp(message: Message, newLevel: number, oldLevel: numbe
       congratsMessage += '\n🎯 **Double digits!** You\'re really getting active!';
     }
 
-    // Send level up message in the same channel
     if (message.channel.isSendable()) {
       await message.channel.send(congratsMessage);
     }
