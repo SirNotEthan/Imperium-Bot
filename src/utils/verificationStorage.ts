@@ -99,9 +99,9 @@ class VerificationStorage {
 
       
       await user.update({
-        robloxId: undefined,
-        robloxUsername: undefined,
-        verifiedAt: undefined
+        robloxId: null,
+        robloxUsername: null,
+        verifiedAt: null
       });
 
       

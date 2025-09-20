@@ -1,10 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { verificationStorage } from '../../utils/verificationStorage';
 import { RobloxAPI } from '../../utils/robloxAPI';
-
-function generateVerificationCode(): string {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
+import { generateVerificationCode } from '../../utils/verificationCode';
 
 const pendingVerifications = new Map<string, { code: string; timestamp: number }>();
 

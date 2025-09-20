@@ -4,12 +4,12 @@ import sequelize from '../database';
 interface UserAttributes {
     id: number;
     discordId: string;
-    robloxId?: number;
-    robloxUsername?: string;
-    verifiedAt?: Date;
+    robloxId?: number | null;
+    robloxUsername?: string | null;
+    verifiedAt?: Date | null;
     messageCount: number;
     level: number;
-    lastMessageTime?: Date;
+    lastMessageTime?: Date | null;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -19,12 +19,12 @@ interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'roblox
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: number;
     public discordId!: string;
-    public robloxId?: number;
-    public robloxUsername?: string;
-    public verifiedAt?: Date;
+    public robloxId?: number | null;
+    public robloxUsername?: string | null;
+    public verifiedAt?: Date | null;
     public messageCount!: number;
     public level!: number;
-    public lastMessageTime?: Date;
+    public lastMessageTime?: Date | null;
     public readonly createdAt!: Date;
     public readonly updatedAt!: Date;
     
