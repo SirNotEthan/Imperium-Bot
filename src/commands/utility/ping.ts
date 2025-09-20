@@ -102,9 +102,11 @@ function setupButtonCollector(
     });
 
     collector?.on("collect", async (buttonInteraction: ButtonInteraction) => {
-        await buttonInteraction.deferUpdate();
-
+        if (buttonInteraction.customId !== "ping_refresh") return;
+        
         try {
+            await buttonInteraction.deferUpdate();
+
             const newMetrics = await calculateRefreshMetrics(buttonInteraction);
             const newEmbed = createRefreshEmbed(newMetrics, interaction);
 
@@ -114,6 +116,13 @@ function setupButtonCollector(
             });
         } catch (error) {
             console.error("Error refreshing ping:", error);
+            
+            if (!buttonInteraction.replied && !buttonInteraction.deferred) {
+                await buttonInteraction.reply({
+                    content: "❌ Failed to refresh ping data.",
+                    ephemeral: true
+                });
+            }
         }
     });
 

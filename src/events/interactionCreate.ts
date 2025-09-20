@@ -64,48 +64,123 @@ async function handleChatInputCommand(
 
 async function handleButtonInteraction(interaction: ButtonInteraction): Promise<void> {
   console.log(`Button: ${interaction.customId} by ${interaction.user.tag}`);
-  const client = interaction.client as Client & { commands?: Collection<string, Command> };
+  const client = interaction.client as Client & { buttons?: Collection<string, any> };
 
   try {
-    switch (interaction.customId) {
-      case 'ping_refresh':
-        break;
-      default:
-        console.info(`Unhandled button: ${interaction.customId}`);
+    // Handle verification-related buttons
+    if (interaction.customId.startsWith('verify_complete_') || 
+        interaction.customId.startsWith('unverify_confirm_') || 
+        interaction.customId.startsWith('unverify_cancel_')) {
+      
+      const { default: verificationButtons } = await import('../interactions/buttons/verificationButtons');
+      await verificationButtons.execute(interaction);
+      return;
     }
+
+    // Handle ping refresh button
+    if (interaction.customId === 'ping_refresh') {
+      // This is handled by the ping command's collector
+      // The collector should handle this, so we don't need to do anything here
+      return;
+    }
+
+    // Check if we have a button handler registered
+    if (client.buttons?.has(interaction.customId)) {
+      const buttonHandler = client.buttons.get(interaction.customId);
+      await buttonHandler.execute(interaction);
+      return;
+    }
+    
+    console.info(`Unhandled button: ${interaction.customId}`);
+    await sendErrorResponse(
+      interaction,
+      'This button interaction is not currently supported.',
+      `Unhandled button: ${interaction.customId}`,
+      'button_not_handled'
+    );
+    
   } catch (err) {
     console.error(`Button error (${interaction.customId}):`, err);
+    await sendErrorResponse(
+      interaction,
+      'Something went wrong while handling this button.',
+      err instanceof Error ? err : new Error(String(err)),
+      'button_execution_error'
+    );
   }
 }
 
 async function handleSelectMenuInteraction(interaction: StringSelectMenuInteraction): Promise<void> {
   console.log(`Select Menu: ${interaction.customId} by ${interaction.user.tag}`);
+  const client = interaction.client as Client & { selectMenus?: Collection<string, any> };
 
   try {
-    switch (interaction.customId) {
-      default:
-        console.info(`Unhandled select menu: ${interaction.customId}`);
+    // Check if we have a select menu handler registered
+    if (client.selectMenus?.has(interaction.customId)) {
+      const selectMenuHandler = client.selectMenus.get(interaction.customId);
+      await selectMenuHandler.execute(interaction);
+      return;
     }
+    
+    console.info(`Unhandled select menu: ${interaction.customId}`);
+    await sendErrorResponse(
+      interaction,
+      'This select menu interaction is not currently supported.',
+      `Unhandled select menu: ${interaction.customId}`,
+      'select_menu_not_handled'
+    );
+    
   } catch (err) {
     console.error(`Select menu error (${interaction.customId}):`, err);
+    await sendErrorResponse(
+      interaction,
+      'Something went wrong while handling this select menu.',
+      err instanceof Error ? err : new Error(String(err)),
+      'select_menu_execution_error'
+    );
   }
 }
 
 async function handleModalInteraction(interaction: ModalSubmitInteraction): Promise<void> {
   console.log(`Modal: ${interaction.customId} by ${interaction.user.tag}`);
+  const client = interaction.client as Client & { modals?: Collection<string, any> };
 
   try {
-    switch (interaction.customId) {
-      default:
-        console.info(`Unhandled modal: ${interaction.customId}`);
+    // Handle verification-related modals
+    if (interaction.customId.startsWith('verify_username_')) {
+      const { default: verificationModals } = await import('../interactions/modals/verificationModals');
+      await verificationModals.execute(interaction);
+      return;
     }
+
+    // Check if we have a modal handler registered
+    if (client.modals?.has(interaction.customId)) {
+      const modalHandler = client.modals.get(interaction.customId);
+      await modalHandler.execute(interaction);
+      return;
+    }
+    
+    console.info(`Unhandled modal: ${interaction.customId}`);
+    await sendErrorResponse(
+      interaction,
+      'This modal interaction is not currently supported.',
+      `Unhandled modal: ${interaction.customId}`,
+      'modal_not_handled'
+    );
+    
   } catch (err) {
     console.error(`Modal error (${interaction.customId}):`, err);
+    await sendErrorResponse(
+      interaction,
+      'Something went wrong while handling this modal.',
+      err instanceof Error ? err : new Error(String(err)),
+      'modal_execution_error'
+    );
   }
 }
 
 async function sendErrorResponse(
-  interaction: ChatInputCommandInteraction,
+  interaction: ChatInputCommandInteraction | ButtonInteraction | StringSelectMenuInteraction | ModalSubmitInteraction,
   userMessage: string,
   error: string | Error,
   errorType: string,

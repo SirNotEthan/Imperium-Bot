@@ -2,6 +2,8 @@ import { REST, Routes, Client, GatewayIntentBits, Collection } from 'discord.js'
 import { config } from 'dotenv';
 import { readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { initializeDatabase } from './database/models';
+import { verificationStorage } from './utils/verificationStorage';
 config();
 
 declare module 'discord.js' {
@@ -22,6 +24,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
   ]
 });
+
 
 client.commands = new Collection();
 client.buttons = new Collection();
@@ -157,7 +160,7 @@ async function deployCommands(): Promise<void> {
         commands.push(command.data.toJSON());
     }
 
-    const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN as string);
+    const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN as string);
 
     try {
         console.log(`Started refreshing application (/) commands.`);
@@ -175,10 +178,16 @@ async function deployCommands(): Promise<void> {
 async function initializeBot(): Promise<void> {
     console.log('Initializing bot...');
     try {
+        console.log('Initializing database...');
+        await initializeDatabase();
+        
+        console.log('Loading verification data...');
+        await verificationStorage.loadFromDatabase();
+        
         await loadCommands();
         await loadEvents();
         await loadInteractions();
-        await client.login(process.env.DISCORD_TOKEN as string);
+        await client.login(process.env.BOT_TOKEN as string);
 
         client.once('ready', async () => {
             await deployCommands();
